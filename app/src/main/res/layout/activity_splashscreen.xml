@@ -1,0 +1,15 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#e92c2c"
+    tools:context="com.example.amira.musicplayer.ui.SplashscreenActivity">
+
+    <ImageView
+        android:id="@+id/logo"
+        android:src="@drawable/logo2"
+        android:layout_width="@dimen/logo_width"
+        android:layout_height="@dimen/logo_height"
+        android:layout_gravity="center"/>
+
+</FrameLayout>

@@ -20,6 +20,10 @@ allprojects {
         google()
         jcenter()
     }
+    ext{
+        compileSdkVersion = 26
+        androidSupportVersion = "26.0.1"
+    }
 }
 
 task clean(type: Delete) {
