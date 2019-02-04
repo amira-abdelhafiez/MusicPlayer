@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.amira.musicplayer">
 
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -12,7 +15,7 @@
         <activity
             android:name=".ui.SplashscreenActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/title_activity_splashscreen"
+            android:label="@string/app_name"
             android:theme="@style/FullscreenTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -24,12 +27,11 @@
             android:name=".ui.HomeActivity"
             android:label="@string/title_activity_home"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".ui.HistoryActivity" />
-        <activity android:name=".ui.FavoritesActivity" />
         <activity
-            android:name=".ui.SettingsActivity"
-            android:label="@string/title_activity_settings" />
-        <activity android:name=".ui.ResultActivity" />
+            android:name=".ui.ResultActivity"
+            android:label="Search"
+            android:parentActivityName=".ui.HomeActivity"
+            android:launchMode="singleTop"/>
 
         <receiver android:name=".widgets.MusicFavWidget">
             <intent-filter>
