@@ -16,6 +16,7 @@ public class Album {
     private String Image;
     private Date ReleaseDate;
     private int Popularity;
+    private String ExternalUrl;
 
     public void setID(String ID) {
         this.ID = ID;
@@ -71,5 +72,13 @@ public class Album {
 
     public int getPopularity() {
         return Popularity;
+    }
+
+    public void setExternalUrl(String externalUrl) {
+        ExternalUrl = externalUrl;
+    }
+
+    public String getExternalUrl() {
+        return ExternalUrl;
     }
 }

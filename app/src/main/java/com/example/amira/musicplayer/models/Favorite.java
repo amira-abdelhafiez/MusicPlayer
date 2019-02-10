@@ -26,7 +26,7 @@ public class Favorite {
     private String Url;
 
     @Ignore
-    private Favorite(){
+    public Favorite(){
 
     }
 

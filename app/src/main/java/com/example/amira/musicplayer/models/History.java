@@ -27,22 +27,22 @@ public class History {
     private String Image;
     @ColumnInfo(name = "url")
     private String Url;
-//    @ColumnInfo(name = "CreatedAt")
-//    private Date CreatedAt;
+    @ColumnInfo(name = "createdAt")
+    private Date CreatedAt;
 
     @Ignore
-    private History(){
+    public History(){
 
     }
 
-    public History(long Id , String spotifyId , String Name , String ArtistName , String Image , String Url ){
+    public History(long Id , String spotifyId , String Name , String ArtistName , String Image , String Url , Date CreatedAt){
         this.Id = Id;
         this.spotifyId = spotifyId;
         this.Name = Name;
         this.ArtistName = ArtistName;
         this.Image = Image;
         this.Url = Url;
-        //this.CreatedAt = date;
+        this.CreatedAt = CreatedAt;
     }
 
     public void setId(long id) {
@@ -91,5 +91,11 @@ public class History {
 
     public String getUrl() {
         return Url;
+    }
+
+    public void setCreatedAt(Date CreatedAt){ this.CreatedAt = CreatedAt;}
+
+    public Date getCreatedAt(){
+        return CreatedAt;
     }
 }

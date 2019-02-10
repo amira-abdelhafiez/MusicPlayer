@@ -22,4 +22,20 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="CustomExoMediaButton">
+        <item name="android:background">?android:attr/selectableItemBackground</item>
+        <item name="android:scaleType">fitXY</item>
+        <item name="android:layout_width">@dimen/exo_player_play_pause_button_dimen</item>
+        <item name="android:layout_height">@dimen/exo_player_play_pause_button_dimen</item>
+    </style>
+
+    <style name="CustomExoMediaButton.Play">
+        <item name="android:src">@drawable/ic_play_circle_filled</item>
+    </style>
+
+    <style name="CustomExoMediaButton.Pause">
+        <item name="android:src">@drawable/ic_pause_circle_filled</item>
+    </style>
+
+    <dimen name="exo_player_play_pause_button_dimen">10dp</dimen>
 </resources>

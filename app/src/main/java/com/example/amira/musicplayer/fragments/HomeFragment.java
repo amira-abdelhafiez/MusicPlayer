@@ -3,6 +3,7 @@ package com.example.amira.musicplayer.fragments;
 import android.content.Context;
 import android.content.Intent;
 import android.media.Image;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -14,10 +15,14 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,7 +42,7 @@ import java.net.URL;
  * Created by Amira on 1/27/2019.
  */
 
-public class HomeFragment extends Fragment {
+public class HomeFragment extends Fragment implements RecentAdapter.ItemOnClickHandler {
 
     private static final String LOG_TAG = HomeFragment.class.getSimpleName();
     private Context mContext;
@@ -51,9 +56,39 @@ public class HomeFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        getActivity().getWindow().setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         View rootView = inflater.inflate(R.layout.fragment_home , container , false);
         mRecentRecyclerView = rootView.findViewById(R.id.rv_new_releases);
-        mSearchText = (AutoCompleteTextView) rootView.findViewById(R.id.et_search);
+        mSearchText = (AutoCompleteTextView) rootView.findViewById(R.id.et_searchtext);
+        mSearchText.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                Log.d("EditClick" , "Clicked Here ");
+                if(event.getAction() == KeyEvent.ACTION_DOWN
+                        || event.getAction() == KeyEvent.KEYCODE_ENTER){
+                    Log.d("EditClick" , "Clicked Here ");
+                    openSearchResult();
+                    return true;
+                }
+                return false;
+            }
+        });
+//        mSearchText.setOnEditorActionListener(new EditText.OnEditorActionListener() {
+//            @Override
+//            public boolean onEditorAction(TextView v, int actionId, KeyEvent keyEvent) {
+//                Log.d("EditClick" , "Clicked Here ");
+//                if(actionId == EditorInfo.IME_ACTION_SEARCH
+//                        || actionId == EditorInfo.IME_ACTION_DONE
+//                        || keyEvent.getAction() == KeyEvent.ACTION_DOWN
+//                        || keyEvent.getAction() == KeyEvent.KEYCODE_ENTER){
+//                    Log.d("EditClick" , "Clicked Here ");
+//                    openSearchResult();
+//                    return true;
+//                }
+//                return false;
+//            }
+//        });
 //        mSearchText.addTextChangedListener(new TextWatcher() {
 //            @Override
 //            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -77,7 +112,7 @@ public class HomeFragment extends Fragment {
                 openSearchResult();
             }
         });
-        mRecentAdapter = new RecentAdapter(mContext);
+        mRecentAdapter = new RecentAdapter(mContext, this);
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         int value = displayMetrics.widthPixels;
@@ -122,6 +157,16 @@ public class HomeFragment extends Fragment {
                     .detach(this)
                     .attach(this)
                     .commit();
+        }
+    }
+
+    @Override
+    public void onClickItem(int position) {
+        if(mNewReleases == null) return;
+        String url = NetworkUtils.WEBSITE_URL + mNewReleases[position].getID();
+        if(url != null) {
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            startActivity(browserIntent);
         }
     }
 

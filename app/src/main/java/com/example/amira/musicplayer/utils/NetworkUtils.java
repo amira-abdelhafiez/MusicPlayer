@@ -1,5 +1,7 @@
 package com.example.amira.musicplayer.utils;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.util.Log;
 
@@ -19,7 +21,9 @@ public class NetworkUtils {
     private static final String LOG_TAG = NetworkUtils.class.getSimpleName();
 
     private static final String  BASE_URL = "https://api.spotify.com/v1/";
-    private static final String ACCESS_TOKEN = "Bearer BQAlQmv_IDnMl4Vnx569P3K4fI0O4UklBEJlX36n6w1xxtJe6cuOHTZKS_mgUP67pGqlaSEtsFP36byBMGbdY_QHcbBiXhClJFyqLmbfEK7uCSyfJ7vfDIcd7LWzzxkJEaYMoqA5XQl1eHVu8dQxPm7kkrlKfBirCw";
+    public static final String WEBSITE_URL = "https://open.spotify.com/album/";
+
+    private static final String ACCESS_TOKEN = "Bearer BQD1lK_-emLI-JLPtHhKTIOYyViVpVPtcH42mwHVDyXQ44pBwKJquvo3DnYWO3cA7s2ByiL6jlV2CGhxSAZ_NNLnQcJnTJGHE3kKbN2BObleyaC34FgXtkdPu4QKZyxyWLkhB37_VGJGWBBqsu2fGlVbvD95ykqWMQ";
     private static final String RETURN_URL = "http://musicplayer.com/callback";
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String SEARCH_PATH =  "search";
@@ -28,6 +32,7 @@ public class NetworkUtils {
     private static final String TRACK_PATH = "tracks";
 
     private static final String TYPE_PARAM = "type";
+    private static final String LIMIT_PARAM = "limit";
     private static final String TYPE_PARAM_VAL = "track";
     private static final String QUERY_PARAM = "q";
     private static final String TRACK_ID_PARAM = "id";
@@ -36,6 +41,7 @@ public class NetworkUtils {
         Uri recentDataUri = Uri.parse(BASE_URL).buildUpon()
                 .appendPath(BROWSE)
                 .appendPath(MOST_RECENT)
+                .appendQueryParameter(LIMIT_PARAM , "40")
                 .build();
 
         URL url = null;
@@ -52,6 +58,7 @@ public class NetworkUtils {
                 .appendPath(SEARCH_PATH)
                 .appendQueryParameter(QUERY_PARAM , queryPhrase)
                 .appendQueryParameter(TYPE_PARAM , TYPE_PARAM_VAL)
+                .appendQueryParameter(LIMIT_PARAM , "40")
                 .build();
 
         URL url = null;
@@ -105,6 +112,21 @@ public class NetworkUtils {
         }
         finally {
             con.disconnect();
+        }
+    }
+
+    public static Bitmap getBitmapFromURL(String src) {
+        try {
+            URL url = new URL(src);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setDoInput(true);
+            connection.connect();
+            InputStream input = connection.getInputStream();
+            Bitmap myBitmap = BitmapFactory.decodeStream(input);
+            return myBitmap;
+        } catch (IOException e) {
+            // Log exception
+            return null;
         }
     }
 }

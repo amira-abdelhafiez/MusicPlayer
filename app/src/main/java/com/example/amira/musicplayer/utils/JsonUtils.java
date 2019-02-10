@@ -29,12 +29,11 @@ public class JsonUtils {
     private static final String NAME = "name";
     private static final String ALBUM_TYPE = "album_type";
     private static final String ID = "id";
-    private static final String TYPE = "type";
     private static final String RELEASE_DATE = "release_date";
     private static final String IMAGE_URL = "url";
+    private static final String EXTERNAL_URL = "href";
 
     // Search
-
     private static final String TRACKS = "tracks";
     private static final String TRACK_ID = "id";
     private static final String TRACK_NAME="name";
@@ -43,7 +42,6 @@ public class JsonUtils {
 
 
     // Track
-
     private static final String PREVIEW_URL = "preview_url";
 
     public static Track[] ParseSearchAlbums(String jsonStr){
@@ -113,6 +111,7 @@ public class JsonUtils {
                         item.setID(itemJson.optString(ID));
                         item.setAlbumType(itemJson.optString(ALBUM_TYPE));
                         item.setName(itemJson.optString(NAME));
+                        item.setExternalUrl(itemJson.optString(EXTERNAL_URL));
                         Log.d("ParsedJson" , Integer.toString(i) + itemJson.optString(NAME));
                         try {
                             date = new SimpleDateFormat("yyyy-MM-dd").parse(itemJson.optString(RELEASE_DATE));

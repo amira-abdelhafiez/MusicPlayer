@@ -106,28 +106,40 @@ public class HomeActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-        Fragment fragment = null;
-        Class fragmentClass = null;
+        int index = 0;
         FragmentManager fragmentManager = getSupportFragmentManager();
         if (id == R.id.nav_favs) {
             // Handle the camera action
+            mFavoritesFragment = new FavoritesFragment();
+            mFavoritesFragment.setmContext(HomeActivity.this);
             fragmentManager.beginTransaction().replace(R.id.flContent, mFavoritesFragment).commit();
+            index = 1;
         } else if (id == R.id.nav_history) {
+            mHistoryFragment = new HistoryFragment();
+            mHistoryFragment.setmContext(HomeActivity.this);
             fragmentManager.beginTransaction().replace(R.id.flContent, mHistoryFragment).commit();
+            index = 2;
         }else if(id == R.id.nav_home){
             mHomeFragment = new HomeFragment();
             mHomeFragment.setmContext(HomeActivity.this);
             fragmentManager.beginTransaction().replace(R.id.flContent, mHomeFragment).commit();
         }
-        item.setChecked(true);
         // Set action bar title
         setTitle(item.getTitle());
+        setChecked(index);
         // Close the navigation drawer
         mDrawer.closeDrawers();
 
         return true;
     }
 
-
+    public void setChecked(int index){
+        mNavigationView.getMenu().getItem(0).getSubMenu().getItem(index).setChecked(true);
+        for(int i = 0 ; i < 3 ; i++){
+            if(i != index){
+                mNavigationView.getMenu().getItem(0).getSubMenu().getItem(i).setChecked(false);
+            }
+        }
+    }
 
 }

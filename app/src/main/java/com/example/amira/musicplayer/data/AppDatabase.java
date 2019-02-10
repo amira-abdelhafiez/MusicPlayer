@@ -3,8 +3,10 @@ package com.example.amira.musicplayer.data;
 import android.arch.persistence.room.Database;
 import android.arch.persistence.room.Room;
 import android.arch.persistence.room.RoomDatabase;
+import android.arch.persistence.room.TypeConverters;
 import android.content.Context;
 
+import com.example.amira.musicplayer.models.DateConvertor;
 import com.example.amira.musicplayer.models.Favorite;
 import com.example.amira.musicplayer.models.FavoriteDao;
 import com.example.amira.musicplayer.models.History;
@@ -15,6 +17,7 @@ import com.example.amira.musicplayer.models.HistoryDao;
  */
 
 @Database(entities = {History.class , Favorite.class} , version = 1 , exportSchema = false)
+@TypeConverters(DateConvertor.class)
 public abstract class AppDatabase extends RoomDatabase {
     private static final String LOG_TAG = AppDatabase.class.getSimpleName();
 
