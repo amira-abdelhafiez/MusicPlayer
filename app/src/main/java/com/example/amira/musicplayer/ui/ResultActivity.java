@@ -1,6 +1,7 @@
 package com.example.amira.musicplayer.ui;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -32,6 +33,7 @@ public class ResultActivity extends AppCompatActivity implements SearchAdapter.I
     private SearchAdapter mSearchAdapter;
     private RecyclerView.LayoutManager mLinearLayoutManager;
     private Track[] mAlbums;
+    private SharedPreferences prefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +43,7 @@ public class ResultActivity extends AppCompatActivity implements SearchAdapter.I
         if(callingIntent != null && callingIntent.hasExtra(Intent.EXTRA_TEXT)){
             mSearchPhrase = callingIntent.getStringExtra(Intent.EXTRA_TEXT);
         }
+        prefs = getSharedPreferences("MusicToken", MODE_PRIVATE);
         ButterKnife.bind(this);
         new SearchQuery().execute(mSearchPhrase);
         mSearchAdapter = new SearchAdapter(this , this);
@@ -66,10 +69,11 @@ public class ResultActivity extends AppCompatActivity implements SearchAdapter.I
         protected String doInBackground(String... strings) {
             String result = null;
             String phrase = strings[0];
-            URL url = NetworkUtils.buildSearchDataUrl(phrase);
+            URL url = NetworkUtils.buildSearchDataUrl(phrase , "30");
             Log.d("ParsedJson" , url.toString());
+            String token = prefs.getString("token" , null);
             try {
-                result = NetworkUtils.getData(url);
+                result = NetworkUtils.getData(url , token);
             } catch (IOException e) {
                 Log.d("ParsedJson" , "Exxception" + e.getMessage());
                 e.printStackTrace();

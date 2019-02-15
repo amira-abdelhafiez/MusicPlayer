@@ -1,7 +1,9 @@
 package com.example.amira.musicplayer.fragments;
 
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.Image;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -9,25 +11,25 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.CursorAdapter;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.Editable;
-import android.text.TextWatcher;
+import android.support.v7.widget.SearchView;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextView;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.amira.musicplayer.R;
+import com.example.amira.musicplayer.adapters.AutoCompleteAdapter;
 import com.example.amira.musicplayer.adapters.RecentAdapter;
 import com.example.amira.musicplayer.models.Album;
 import com.example.amira.musicplayer.ui.ResultActivity;
@@ -37,6 +39,10 @@ import com.example.amira.musicplayer.utils.NetworkUtils;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * Created by Amira on 1/27/2019.
@@ -50,66 +56,48 @@ public class HomeFragment extends Fragment implements RecentAdapter.ItemOnClickH
     private RecyclerView mRecentRecyclerView;
     private RecentAdapter mRecentAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
-    private ImageView mSearch;
-    private AutoCompleteTextView mSearchText;
+    private SearchView mSearchView;
+    private SharedPreferences prefs;
+    private AutoCompleteAdapter mSearchAdapter;
+    private ListView mSearchSuggestionList;
+    private List<String> mSuggestionsList;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         getActivity().getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        prefs = mContext.getSharedPreferences("MusicToken", MODE_PRIVATE);
         View rootView = inflater.inflate(R.layout.fragment_home , container , false);
         mRecentRecyclerView = rootView.findViewById(R.id.rv_new_releases);
-        mSearchText = (AutoCompleteTextView) rootView.findViewById(R.id.et_searchtext);
-        mSearchText.setOnKeyListener(new View.OnKeyListener() {
+
+        mSearchSuggestionList = (ListView) rootView.findViewById(R.id.search_suggestions_list);
+        mSearchView = rootView.findViewById(R.id.search_text);
+        mSearchAdapter = new AutoCompleteAdapter(mContext);
+        List<String> suggestions = new ArrayList<>();
+        mSearchAdapter.setmSearchSuggestions(suggestions);
+        mSearchSuggestionList.setAdapter(mSearchAdapter);
+        mSearchSuggestionList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                Log.d("EditClick" , "Clicked Here ");
-                if(event.getAction() == KeyEvent.ACTION_DOWN
-                        || event.getAction() == KeyEvent.KEYCODE_ENTER){
-                    Log.d("EditClick" , "Clicked Here ");
-                    openSearchResult();
-                    return true;
-                }
-                return false;
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                openSearchResult(mSuggestionsList.get(position));
             }
         });
-//        mSearchText.setOnEditorActionListener(new EditText.OnEditorActionListener() {
-//            @Override
-//            public boolean onEditorAction(TextView v, int actionId, KeyEvent keyEvent) {
-//                Log.d("EditClick" , "Clicked Here ");
-//                if(actionId == EditorInfo.IME_ACTION_SEARCH
-//                        || actionId == EditorInfo.IME_ACTION_DONE
-//                        || keyEvent.getAction() == KeyEvent.ACTION_DOWN
-//                        || keyEvent.getAction() == KeyEvent.KEYCODE_ENTER){
-//                    Log.d("EditClick" , "Clicked Here ");
-//                    openSearchResult();
-//                    return true;
-//                }
-//                return false;
-//            }
-//        });
-//        mSearchText.addTextChangedListener(new TextWatcher() {
-//            @Override
-//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-//
-//            }
-//
-//            @Override
-//            public void onTextChanged(CharSequence s, int start, int before, int count) {
-//
-//            }
-//
-//            @Override
-//            public void afterTextChanged(Editable s) {
-//
-//            }
-//        });
-        mSearch = (ImageView) rootView.findViewById(R.id.search_ic);
-        mSearch.setOnClickListener(new View.OnClickListener() {
+
+        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
-            public void onClick(View v) {
-                openSearchResult();
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if(newText.isEmpty()){
+                    List<String> suggestions = new ArrayList<>();
+                    mSearchAdapter.setmSearchSuggestions(suggestions);
+                }
+                new SearchQuery().execute(newText);
+                return false;
             }
         });
         mRecentAdapter = new RecentAdapter(mContext, this);
@@ -181,8 +169,10 @@ public class HomeFragment extends Fragment implements RecentAdapter.ItemOnClickH
             String result = null;
             URL url = NetworkUtils.buildRecentDataUrl();
             Log.d("ParsedJson" , url.toString());
+            String token = prefs.getString("token", null);
+
             try {
-                result = NetworkUtils.getData(url);
+                result = NetworkUtils.getData(url , token);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -205,10 +195,45 @@ public class HomeFragment extends Fragment implements RecentAdapter.ItemOnClickH
         }
     }
 
-    private void openSearchResult(){
-        String searchPharse = mSearchText.getText().toString();
+
+    class SearchQuery extends AsyncTask<String , Void , String>{
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected String doInBackground(String... strings) {
+            String result = null;
+            String phrase = strings[0];
+            URL url = NetworkUtils.buildSearchDataUrl(phrase , "5");
+            Log.d("ParsedJson" , url.toString());
+            String token = prefs.getString("token" , null);
+            try {
+                result = NetworkUtils.getData(url , token);
+            } catch (IOException e) {
+                Log.d("ParsedJson" , "Exception" + e.getMessage());
+                e.printStackTrace();
+            }
+            return result;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            if(s != null){
+                List<String> names = JsonUtils.ParseSearchAlbumsSearch(s);
+                //Log.d("ParsedJson" , Integer.toString(mAlbums.length));
+                mSuggestionsList = names;
+                mSearchAdapter.setmSearchSuggestions(names);
+            }else{
+            }
+        }
+    }
+
+    private void openSearchResult(String queryStr){
         Intent intent = new Intent(mContext , ResultActivity.class);
-        intent.putExtra(Intent.EXTRA_TEXT , searchPharse);
+        intent.putExtra(Intent.EXTRA_TEXT , queryStr);
         startActivity(intent);
     }
 

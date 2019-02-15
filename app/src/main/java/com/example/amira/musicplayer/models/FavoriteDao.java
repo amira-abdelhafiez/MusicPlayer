@@ -22,8 +22,11 @@ public interface FavoriteDao {
     @Query("SELECT * FROM favorite")
     LiveData<List<Favorite>> getFavorites();
 
+    @Query("SELECT * FROM favorite")
+    List<Favorite> getFavoritesForWidget();
+
     @Query("SELECT * FROM favorite WHERE _id = :Id")
-    LiveData<Favorite> getFavById(String Id);
+    Favorite getFavById(String Id);
 
     @Query("SELECT COUNT(*) FROM favorite")
     int count();

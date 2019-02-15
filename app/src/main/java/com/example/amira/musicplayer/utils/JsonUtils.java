@@ -44,6 +44,13 @@ public class JsonUtils {
     // Track
     private static final String PREVIEW_URL = "preview_url";
 
+
+    // Token
+    private static final String ACCESS_TOKEN = "access_token";
+
+
+    // Parsing Methods
+
     public static Track[] ParseSearchAlbums(String jsonStr){
        Track[] parsedTrackList = null;
 
@@ -89,6 +96,34 @@ public class JsonUtils {
        return  parsedTrackList;
     }
 
+
+    public static List<String> ParseSearchAlbumsSearch(String jsonStr){
+        List<String> parsedTrackList = null;
+
+        if(jsonStr != null){
+            try{
+                JSONObject obj = new JSONObject(jsonStr);
+                JSONObject tracks = obj.getJSONObject(TRACKS);
+                JSONArray items = tracks.getJSONArray(ITEMS);
+
+                int length = items.length();
+                parsedTrackList = new ArrayList<>(length);
+                String track;
+                JSONObject itemJson ;
+                for(int i = 0 ; i < length ; i++){
+                    itemJson = new JSONObject(items.optString(i));
+                    track = itemJson.optString(TRACK_NAME);
+                    parsedTrackList.add(track);
+                }
+
+            }catch(JSONException ex){
+                Log.d(LOG_TAG , "Exception " + ex.getMessage());
+            }
+        }else{
+            Log.d(LOG_TAG , "Null Data");
+        }
+        return  parsedTrackList;
+    }
 
     public static Album[] ParseNewReleasesAlbums(String jsonStr){
         Album[] parsedAlbumList = null;
@@ -173,5 +208,22 @@ public class JsonUtils {
          }
 
          return  parsedJsonObj;
+    }
+
+    public static String getParsedToken(String jsonData){
+        String parsedToken = null;
+
+        if(jsonData != null){
+            try{
+                JSONObject jsonObject = new JSONObject(jsonData);
+                parsedToken = jsonObject.optString(ACCESS_TOKEN);
+                Log.d("Amira" , parsedToken);
+            }catch(JSONException e){
+                Log.d(LOG_TAG , "Exception with token parsing " + e.getMessage());
+            }
+        }else{
+            Log.d(LOG_TAG , "Null Json");
+        }
+        return parsedToken;
     }
 }

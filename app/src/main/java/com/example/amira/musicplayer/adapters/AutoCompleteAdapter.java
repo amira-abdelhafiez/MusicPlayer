@@ -9,7 +9,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
+import android.widget.BaseAdapter;
 import android.widget.Filterable;
+import android.widget.TextView;
+
+import com.example.amira.musicplayer.R;
 
 import java.util.List;
 
@@ -17,44 +22,44 @@ import java.util.List;
  * Created by Amira on 2/2/2019.
  */
 
-public class AutoCompleteAdapter extends ArrayAdapter<String>  {
+public class AutoCompleteAdapter extends BaseAdapter {
+    private List<String> mSearchSuggestions;
+    private Context mContext;
 
-    private AppCompatActivity activity;
-    private List<String> names;
-    private static LayoutInflater inflater = null;
-
-    public AutoCompleteAdapter(AppCompatActivity a, int textViewResourceId, List<String> lst) {
-        super(a, textViewResourceId, lst);
-        activity = a;
-        names = lst;
-        inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    public AutoCompleteAdapter(Context context){
+        mContext = context;
     }
 
-    public void setNames(List<String> names) {
-        this.names = names;
+    public void setmSearchSuggestions(List<String> mSearchSuggestions) {
+        this.mSearchSuggestions = mSearchSuggestions;
         notifyDataSetChanged();
     }
 
+    @Override
     public int getCount() {
-        return names.size();
+        if(mSearchSuggestions == null) return 0;
+        else return mSearchSuggestions.size();
     }
 
+    @Override
+    public Object getItem(int position) {
+        return mSearchSuggestions.get(position);
+    }
+
+    @Override
     public long getItemId(int position) {
         return position;
     }
 
-    public String getCurrentString(int position) {
-        return names.get(position);
-    }
-
-    public void removeItem(int position) {
-        names.remove(position);
-    }
-
-    @NonNull
     @Override
-    public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        View vi = convertView;
-        return super.getView(position, convertView, parent);
+    public View getView(int position, View convertView, ViewGroup parent) {
+        View ListItem = convertView;
+        if(ListItem == null){
+            ListItem = LayoutInflater.from(mContext).inflate(R.layout.search_item , parent , false);
+
+        }
+        TextView searchTextView = ListItem.findViewById(R.id.tv_search_suggest);
+        searchTextView.setText(mSearchSuggestions.get(position));
+        return ListItem;
     }
 }

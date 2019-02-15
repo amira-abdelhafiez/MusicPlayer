@@ -43,6 +43,11 @@
                 android:resource="@xml/music_fav_widget_info" />
         </receiver>
 
+        <service
+            android:name=".widgets.GridViewService"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
+        <service android:name=".widgets.MusicFavWidgetIntentService"
+            android:exported="false" />
         <activity android:name=".ui.PlayerActivity"
             android:launchMode="singleTop"/>
     </application>

@@ -1,5 +1,9 @@
 package com.example.amira.musicplayer.fragments;
 
+import android.arch.lifecycle.LifecycleOwner;
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -18,6 +22,7 @@ import com.example.amira.musicplayer.R;
 import com.example.amira.musicplayer.adapters.FavoritesAdapter;
 import com.example.amira.musicplayer.data.AppDatabase;
 import com.example.amira.musicplayer.models.Favorite;
+import com.example.amira.musicplayer.models.FavoriteViewModel;
 import com.example.amira.musicplayer.ui.PlayerActivity;
 
 import java.util.List;
@@ -30,7 +35,7 @@ public class FavoritesFragment extends Fragment implements FavoritesAdapter.Item
     private static final String LOG_TAG = FavoritesFragment.class.getSimpleName();
     private Context mContext;
     private List<Favorite> mFavList;
-    private AppDatabase mDb;
+    private FavoriteViewModel mFavVM;
 
     private FavoritesAdapter mAdapter;
     private RecyclerView mFavRecyclerView;
@@ -40,7 +45,7 @@ public class FavoritesFragment extends Fragment implements FavoritesAdapter.Item
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_favorites , container , false);
-        mDb = AppDatabase.getsInstance(mContext);
+        mFavVM = ViewModelProviders.of(this).get(FavoriteViewModel.class);
         mFavRecyclerView = rootView.findViewById(R.id.rv_favs);
         mAdapter = new FavoritesAdapter(mContext , this);
         mLayoutManager = new LinearLayoutManager(mContext , LinearLayoutManager.VERTICAL , false);
@@ -53,7 +58,9 @@ public class FavoritesFragment extends Fragment implements FavoritesAdapter.Item
     public void setmContext(Context mContext) {
         this.mContext = mContext;
     }
-
+    private void setmFavList(List<Favorite> favList){
+        this.mFavList = favList;
+    }
     @Override
     public void onClickItem(int position) {
         Intent intent = new Intent(mContext , PlayerActivity.class);
@@ -61,7 +68,7 @@ public class FavoritesFragment extends Fragment implements FavoritesAdapter.Item
         startActivity(intent);
     }
 
-    class GetFavQuery extends AsyncTask<Void , Void , List<Favorite>>{
+    class GetFavQuery extends AsyncTask<Void , Void , Void>{
 
         @Override
         protected void onPreExecute() {
@@ -69,23 +76,22 @@ public class FavoritesFragment extends Fragment implements FavoritesAdapter.Item
         }
 
         @Override
-        protected List<Favorite> doInBackground(Void... voids) {
-            List<Favorite> Favs = mDb.favoriteDao().getFavorites();
-            return Favs;
+        protected Void doInBackground(Void... voids) {
+            mFavVM.GetAllFavs().observe((LifecycleOwner) mContext, new Observer<List<Favorite>>() {
+                @Override
+                public void onChanged(@Nullable List<Favorite> favorites) {
+                    mAdapter.setmFavorites(favorites);
+                    setmFavList(favorites);
+                }
+            });
+            return null;
         }
 
-        @Override
-        protected void onPostExecute(List<Favorite> favorites) {
-            super.onPostExecute(favorites);
-            if(favorites != null){
-                Log.d("FavoriteQery" , "the sixe is " + favorites.size());
-                mFavList = favorites;
-                mAdapter.setmFavorites(mFavList);
-            }else{
-                Log.d("FavoriteQery" , "Favorite null");
-                Log.d(LOG_TAG , "Null Cursor");
-            }
-        }
+//        @Override
+//        protected void onPostExecute(List<Favorite> favorites) {
+//            super.onPostExecute(favorites);
+//
+//        }
     }
 
     @Override

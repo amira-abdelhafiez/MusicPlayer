@@ -1,12 +1,14 @@
 package com.example.amira.musicplayer.ui;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -21,6 +23,7 @@ import com.example.amira.musicplayer.R;
 import com.example.amira.musicplayer.fragments.FavoritesFragment;
 import com.example.amira.musicplayer.fragments.HistoryFragment;
 import com.example.amira.musicplayer.fragments.HomeFragment;
+import com.example.amira.musicplayer.utils.JsonUtils;
 import com.example.amira.musicplayer.utils.NetworkUtils;
 
 import java.io.IOException;
@@ -47,8 +50,9 @@ public class HomeActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        ButterKnife.bind(this);
+        new newTokenQuery().execute();
 
+        ButterKnife.bind(this);
         setSupportActionBar(toolbar);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, mDrawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -67,6 +71,7 @@ public class HomeActivity extends AppCompatActivity
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.flContent, mHomeFragment).commit();
+        setChecked(0);
     }
 
     @Override
@@ -125,7 +130,7 @@ public class HomeActivity extends AppCompatActivity
             fragmentManager.beginTransaction().replace(R.id.flContent, mHomeFragment).commit();
         }
         // Set action bar title
-        setTitle(item.getTitle());
+        setTitle(item.getTitle().toString());
         setChecked(index);
         // Close the navigation drawer
         mDrawer.closeDrawers();
@@ -138,6 +143,32 @@ public class HomeActivity extends AppCompatActivity
         for(int i = 0 ; i < 3 ; i++){
             if(i != index){
                 mNavigationView.getMenu().getItem(0).getSubMenu().getItem(i).setChecked(false);
+            }
+        }
+    }
+
+
+    class newTokenQuery extends AsyncTask<Void , Void , String>{
+        @Override
+        protected String doInBackground(Void... voids) {
+            String result = null;
+            try{
+                result = NetworkUtils.getNewToken();
+                //Log.d("Amira" , result);
+            }catch(IOException e){
+                Log.d("Amira" , "null result");
+            }
+            return result;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            if(s != null){
+                String token = JsonUtils.getParsedToken(s);
+                SharedPreferences.Editor editor = getSharedPreferences("MusicToken", MODE_PRIVATE).edit();
+                editor.putString("token", token);
+                editor.apply();
             }
         }
     }

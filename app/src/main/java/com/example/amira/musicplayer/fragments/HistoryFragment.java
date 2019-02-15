@@ -1,5 +1,8 @@
 package com.example.amira.musicplayer.fragments;
 
+import android.arch.lifecycle.LifecycleOwner;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -19,7 +22,10 @@ import com.example.amira.musicplayer.R;
 import com.example.amira.musicplayer.adapters.HistoryAdapter;
 import com.example.amira.musicplayer.data.AppDatabase;
 import com.example.amira.musicplayer.data.DataContract;
+import com.example.amira.musicplayer.models.Favorite;
+import com.example.amira.musicplayer.models.FavoriteViewModel;
 import com.example.amira.musicplayer.models.History;
+import com.example.amira.musicplayer.models.HistoryViewModel;
 import com.example.amira.musicplayer.ui.PlayerActivity;
 import com.example.amira.musicplayer.ui.ResultActivity;
 
@@ -34,7 +40,7 @@ public class HistoryFragment extends Fragment implements HistoryAdapter.ItemOnCl
     private static final String LOG_TAG = HistoryFragment.class.getSimpleName();
     private Context mContext;
     private List<History> mHistory;
-    private AppDatabase mDb;
+    private HistoryViewModel mHistoryVM;
 
     private HistoryAdapter mAdapter;
     private RecyclerView mHistoryRecyclerView;
@@ -43,7 +49,7 @@ public class HistoryFragment extends Fragment implements HistoryAdapter.ItemOnCl
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        mDb = AppDatabase.getsInstance(mContext);
+        mHistoryVM = ViewModelProviders.of(this).get(HistoryViewModel.class);
         View rootView = inflater.inflate(R.layout.fragment_history , container , false);
         mHistoryRecyclerView = rootView.findViewById(R.id.rv_history);
         mAdapter = new HistoryAdapter(mContext , this);
@@ -57,6 +63,9 @@ public class HistoryFragment extends Fragment implements HistoryAdapter.ItemOnCl
     public void setmContext(Context mContext) {
         this.mContext = mContext;
     }
+    private void setmHistory(List<History> favHistory){
+        this.mHistory = favHistory;
+    }
 
     @Override
     public void onClickItem(int position) {
@@ -65,7 +74,7 @@ public class HistoryFragment extends Fragment implements HistoryAdapter.ItemOnCl
         startActivity(intent);
     }
 
-    class GetHistoryQuery extends AsyncTask<Void , Void , List<History>>{
+    class GetHistoryQuery extends AsyncTask<Void , Void , Void>{
 
         @Override
         protected void onPreExecute() {
@@ -73,21 +82,27 @@ public class HistoryFragment extends Fragment implements HistoryAdapter.ItemOnCl
         }
 
         @Override
-        protected List<History> doInBackground(Void... voids) {
-            List<History> history = mDb.historyDao().getHistory();
-            return history;
+        protected Void doInBackground(Void... voids) {
+            mHistoryVM.getHistory().observe((LifecycleOwner) mContext, new Observer<List<History>>() {
+                @Override
+                public void onChanged(@Nullable List<History> histories) {
+                    mAdapter.setmHistory(histories);
+                    setmHistory(histories);
+                }
+            });
+            return null;
         }
 
-        @Override
-        protected void onPostExecute(List<History> dataCursor) {
-            super.onPostExecute(dataCursor);
-            if(dataCursor != null){
-                mHistory = dataCursor;
-                mAdapter.setmHistory(mHistory);
-            }else{
-                Log.d(LOG_TAG , "Null Cursor");
-            }
-        }
+//        @Override
+//        protected void onPostExecute(List<History> dataCursor) {
+//            super.onPostExecute(dataCursor);
+//            if(dataCursor != null){
+//                mHistory = dataCursor;
+//                mAdapter.setmHistory(mHistory);
+//            }else{
+//                Log.d(LOG_TAG , "Null Cursor");
+//            }
+//        }
     }
 
     @Override

@@ -1,6 +1,9 @@
 package com.example.amira.musicplayer.ui;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -17,10 +20,13 @@ import android.widget.Toast;
 import com.example.amira.musicplayer.R;
 import com.example.amira.musicplayer.data.AppDatabase;
 import com.example.amira.musicplayer.models.Favorite;
+import com.example.amira.musicplayer.models.FavoriteViewModel;
 import com.example.amira.musicplayer.models.History;
+import com.example.amira.musicplayer.models.HistoryViewModel;
 import com.example.amira.musicplayer.models.Track;
 import com.example.amira.musicplayer.utils.JsonUtils;
 import com.example.amira.musicplayer.utils.NetworkUtils;
+import com.example.amira.musicplayer.widgets.MusicFavWidgetIntentService;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
@@ -50,6 +56,7 @@ public class PlayerActivity extends AppCompatActivity {
     private static final String CURRENT_TRACK_ID = "currentTrack";
     private long mCurrentPlayerPosition = 0;
     private boolean mPlayWhenReady = true;
+    private SharedPreferences prefs;
 
     private Boolean IsFavorite = false;
     // Bundle
@@ -59,9 +66,10 @@ public class PlayerActivity extends AppCompatActivity {
     private static final String ARTIST = "artist";
     private static final String URL = "url";
 
-    private AppDatabase mDb;
+    private HistoryViewModel mHistoryVM;
+    private FavoriteViewModel mFavVM;
 
-    private SimpleExoPlayer mExoPlayer;
+    private static SimpleExoPlayer mExoPlayer;
 
     @BindView(R.id.exo_player_view)
     SimpleExoPlayerView mExoPlayerView;
@@ -76,7 +84,10 @@ public class PlayerActivity extends AppCompatActivity {
         setContentView(R.layout.activity_player);
         setTitle("Playing ...");
 
-        mDb = AppDatabase.getsInstance(this);
+        prefs = getSharedPreferences("MusicToken", MODE_PRIVATE);
+
+        mFavVM = ViewModelProviders.of(this).get(FavoriteViewModel.class);
+        mHistoryVM = ViewModelProviders.of(this).get(HistoryViewModel.class);
 
         Intent callingIntent = getIntent();
 
@@ -118,10 +129,12 @@ public class PlayerActivity extends AppCompatActivity {
         protected String doInBackground(String... strings) {
             String id = strings[0];
             String result = null;
+
             if(id != null && !id.isEmpty()){
                 URL url = NetworkUtils.buildGetTrackURL(id);
+                String token = prefs.getString("token" , "");
                 try {
-                    result = NetworkUtils.getData(url);
+                    result = NetworkUtils.getData(url , token);
                 }catch(IOException ex){
                     Log.d("ParsedJson" , ex.getMessage());
                 }
@@ -164,13 +177,13 @@ public class PlayerActivity extends AppCompatActivity {
                 favorite.setArtistName(artistName.toString());
                 favorite.setImage(mCurrentTrack.getImage());
                 favorite.setUrl(mCurrentTrack.getPreviewUrl());
-                long addedId = mDb.favoriteDao().insertFavorite(favorite);
+                long addedId = mFavVM.addFavorite(favorite);
                 Log.d("FavoriteQery" , "Added " + addedId);
                // mFavFab.setBackgroundDrawable(ContextCompat.getDrawable(PlayerActivity.this , R.drawable.heart_green));
                 IsFavorite = true;
             }else{
                 // Remove
-                mDb.favoriteDao().deleteFavById(mCurrentTrack.getId());
+                mFavVM.deleteFavorite(mCurrentTrack.getId());
                 Log.d("FavoriteQery" , "Remove");
                 //mFavFab.setBackgroundDrawable(ContextCompat.getDrawable(PlayerActivity.this , R.drawable.heart_white));
                 IsFavorite = false;
@@ -182,6 +195,9 @@ public class PlayerActivity extends AppCompatActivity {
         protected void onPostExecute(Boolean aBoolean) {
             super.onPostExecute(aBoolean);
             setFavImage(IsFavorite);
+            Intent intent = new Intent(PlayerActivity.this , MusicFavWidgetIntentService.class);
+            intent.setAction(MusicFavWidgetIntentService.ACTION_UPDATE_WIDGET);
+            startService(intent);
             Log.d("FavoriteQery" ,"Favorite " + IsFavorite.toString());
         }
     }
@@ -212,7 +228,7 @@ public class PlayerActivity extends AppCompatActivity {
             history.setUrl(bundle.getString(URL));
             history.setCreatedAt(new Date());
 
-            long insertedId = mDb.historyDao().insertHistory(history);
+            long insertedId = mHistoryVM.insertHistory(history);
 
             if(insertedId > 0){
                 Log.d(LOG_TAG , "inserted");
@@ -233,7 +249,7 @@ public class PlayerActivity extends AppCompatActivity {
         protected Boolean doInBackground(String... strings) {
             String id = strings[0];
             if(id == null) return false;
-            Favorite favorite = mDb.favoriteDao().getFavById(id);
+            Favorite favorite = mFavVM.getFavById(id);
             if(favorite == null){
                 return false;
             }else{
@@ -357,7 +373,7 @@ public class PlayerActivity extends AppCompatActivity {
         super.onPause();
         if (Util.SDK_INT <= 23) {
             // release player
-            releasePlayer();
+            //releasePlayer();
         }
     }
 
@@ -366,8 +382,13 @@ public class PlayerActivity extends AppCompatActivity {
         super.onStop();
         if (Util.SDK_INT > 23) {
             // release player
-            releasePlayer();
+
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        releasePlayer();
+    }
 }

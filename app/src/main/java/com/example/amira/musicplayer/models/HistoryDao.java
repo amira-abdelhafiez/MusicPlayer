@@ -20,7 +20,7 @@ public interface HistoryDao {
     LiveData<List<History>> getHistory();
 
     @Query("SELECT * FROM history WHERE _id = :Id")
-    LiveData<History> getHistoryById(long Id);
+    History getHistoryById(long Id);
 
     @Query("SELECT COUNT(*) FROM history")
     int count();
