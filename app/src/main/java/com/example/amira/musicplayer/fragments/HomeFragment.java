@@ -26,6 +26,8 @@ import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.amira.musicplayer.R;
@@ -55,24 +57,33 @@ public class HomeFragment extends Fragment implements RecentAdapter.ItemOnClickH
     private Album[] mNewReleases;
     private RecyclerView mRecentRecyclerView;
     private RecentAdapter mRecentAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
+    private GridLayoutManager mLayoutManager;
     private SearchView mSearchView;
     private SharedPreferences prefs;
     private AutoCompleteAdapter mSearchAdapter;
     private ListView mSearchSuggestionList;
     private List<String> mSuggestionsList;
 
+    private ProgressBar mLoadingBar;
+    private TextView mErrorMessage;
+    private static final String RV_POSITION = "rvposition";
+    private int mCurrentScrollPosition = 0;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         getActivity().getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        mContext = getContext();
         prefs = mContext.getSharedPreferences("MusicToken", MODE_PRIVATE);
         View rootView = inflater.inflate(R.layout.fragment_home , container , false);
-        mRecentRecyclerView = rootView.findViewById(R.id.rv_new_releases);
 
+        mRecentRecyclerView = rootView.findViewById(R.id.rv_new_releases);
+        mLoadingBar = rootView.findViewById(R.id.pb_loading_bar);
+        mErrorMessage = rootView.findViewById(R.id.tv_error_message);
         mSearchSuggestionList = (ListView) rootView.findViewById(R.id.search_suggestions_list);
         mSearchView = rootView.findViewById(R.id.search_text);
+
         mSearchAdapter = new AutoCompleteAdapter(mContext);
         List<String> suggestions = new ArrayList<>();
         mSearchAdapter.setmSearchSuggestions(suggestions);
@@ -87,6 +98,7 @@ public class HomeFragment extends Fragment implements RecentAdapter.ItemOnClickH
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
+                openSearchResult(query);
                 return false;
             }
 
@@ -118,6 +130,7 @@ public class HomeFragment extends Fragment implements RecentAdapter.ItemOnClickH
         mLayoutManager = new GridLayoutManager(mContext , span);
         mRecentRecyclerView.setAdapter(mRecentAdapter);
         mRecentRecyclerView.setLayoutManager(mLayoutManager);
+        hideErrorMessage();
         new RecentQuery().execute();
         populateData();
         return rootView;
@@ -162,6 +175,7 @@ public class HomeFragment extends Fragment implements RecentAdapter.ItemOnClickH
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            showLoadingSpinner();
         }
 
         @Override
@@ -186,11 +200,18 @@ public class HomeFragment extends Fragment implements RecentAdapter.ItemOnClickH
                 Log.d("ParsedJson" , s);
                 mNewReleases = JsonUtils.ParseNewReleasesAlbums(s);
                 mRecentAdapter.setmAlbums(mNewReleases);
-
+                if(prefs.contains(RV_POSITION)){
+                    mCurrentScrollPosition = prefs.getInt(RV_POSITION , 0);
+                }
+                mLayoutManager.scrollToPosition(mCurrentScrollPosition);
                 Log.d("ParsedJson" , "Here" + mNewReleases[0].getName());
                 Log.d("ParsedJson" , "Here" + mNewReleases[0].getImage());
+                hideLoadingSpinner();
+                hideErrorMessage();
             }else{
-                Toast.makeText(mContext , "Null Data" , Toast.LENGTH_SHORT).show();
+                //Toast.makeText(mContext , "Null Data" , Toast.LENGTH_SHORT).show();
+                hideLoadingSpinner();
+                showErrorMessage();
             }
         }
     }
@@ -237,4 +258,32 @@ public class HomeFragment extends Fragment implements RecentAdapter.ItemOnClickH
         startActivity(intent);
     }
 
+    private void showErrorMessage(){
+        mRecentRecyclerView.setVisibility(View.INVISIBLE);
+        mErrorMessage.setVisibility(View.VISIBLE);
+    }
+    private void hideErrorMessage(){
+        mErrorMessage.setVisibility(View.INVISIBLE);
+        mRecentRecyclerView.setVisibility(View.VISIBLE);
+    }
+
+    private void showLoadingSpinner(){
+        mLoadingBar.setVisibility(View.VISIBLE);
+        mRecentRecyclerView.setVisibility(View.INVISIBLE);
+    }
+
+    private void hideLoadingSpinner(){
+        mLoadingBar.setVisibility(View.INVISIBLE);
+        mRecentRecyclerView.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        int currentVisiblePosition = 0;
+        currentVisiblePosition = mLayoutManager.findFirstVisibleItemPosition();
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt(RV_POSITION , currentVisiblePosition);
+        editor.apply();
+        super.onSaveInstanceState(outState);
+    }
 }

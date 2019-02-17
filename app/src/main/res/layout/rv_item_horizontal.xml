@@ -33,7 +33,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/tv_album_name"
             android:layout_marginStart="@dimen/margin_8"
-            android:visibility="gone"/>
+            android:visibility="invisible"/>
 
     </RelativeLayout>
 </LinearLayout>

@@ -40,7 +40,7 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.Favo
     public FavoriteItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         mContext = parent.getContext();
         LayoutInflater layoutInflater = LayoutInflater.from(mContext);
-        View view = layoutInflater.inflate(R.layout.rv_item_horizontal , parent , false);
+        View view = layoutInflater.inflate(R.layout.rv_item_vertical , parent , false);
         FavoritesAdapter.FavoriteItemViewHolder vh = new FavoritesAdapter.FavoriteItemViewHolder(view);
         return vh;
     }
@@ -75,8 +75,8 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.Favo
 
         public FavoriteItemViewHolder(View itemView) {
             super(itemView);
-            mAlbumName = itemView.findViewById(R.id.tv_album_name);
-            mAlbumImage = itemView.findViewById(R.id.iv_album_image);
+            mAlbumName = itemView.findViewById(R.id.tv_item_name);
+            mAlbumImage = itemView.findViewById(R.id.iv_item_image);
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

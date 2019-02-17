@@ -1,0 +1,104 @@
+{
+  "project_info": {
+    "project_number": "864755625633",
+    "firebase_url": "https://musicplayer-capstone.firebaseio.com",
+    "project_id": "musicplayer-capstone",
+    "storage_bucket": "musicplayer-capstone.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:864755625633:android:8b519d93116b702f",
+        "android_client_info": {
+          "package_name": "com.example.amira.musicplayer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "864755625633-34ara86d5na7s44ojtqg1vqqo4fnj3m2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBuwTKn3b9407stYAsBhAGTj1Uvbo-gvt4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:864755625633:android:9ee2c5206825f08a",
+        "android_client_info": {
+          "package_name": "com.example.amira.musicplayer.free"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "864755625633-34ara86d5na7s44ojtqg1vqqo4fnj3m2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBuwTKn3b9407stYAsBhAGTj1Uvbo-gvt4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:864755625633:android:678d0268a4661ff0",
+        "android_client_info": {
+          "package_name": "com.example.amira.musicplayer.paid"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "864755625633-34ara86d5na7s44ojtqg1vqqo4fnj3m2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBuwTKn3b9407stYAsBhAGTj1Uvbo-gvt4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

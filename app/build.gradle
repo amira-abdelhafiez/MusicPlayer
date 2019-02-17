@@ -1,6 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        myconfig {
+            keyAlias 'musicplayerkey'
+            keyPassword 'Yarab123'
+            storeFile file("$rootDir/keystore.jks")
+            storePassword 'Yarab123'
+        }
+    }
     compileSdkVersion 27
     defaultConfig {
         applicationId "com.example.amira.musicplayer"
@@ -15,13 +23,32 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.myconfig
         }
+    }
+
+    flavorDimensions "default"
+    productFlavors {
+        free {
+            applicationId "com.example.amira.musicplayer.free"
+            versionName "1.0­free"
+        }
+        paid {
+            applicationId "com.example.amira.musicplayer.paid"
+            versionName "1.0­paid"
+        }
+    }
+
+    lintOptions {
+        checkReleaseBuilds false
+        abortOnError false
     }
 }
 
 dependencies {
     // Support Libraries
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    //noinspection GradleCompatible
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support:support-v4:27.1.1'
     implementation 'com.android.support:design:27.1.1'
@@ -42,11 +69,19 @@ dependencies {
     implementation "android.arch.lifecycle:extensions:1.1.1"
     annotationProcessor "android.arch.lifecycle:compiler:1.1.1"
 
+    //implementation 'com.google.firebase:firebase-core:16.0.7'
+
     // Exo player
     implementation 'com.google.android.exoplayer:exoplayer:r2.2.0'
 
     // Picasso
     implementation 'com.squareup.picasso:picasso:2.5.2'
+
+    // Google Play Services
+
+    //noinspection GradleCompatible
+    freeImplementation 'com.google.android.gms:play-services-ads:17.1.2'
+    implementation 'com.google.android.gms:play-services-analytics:16.0.6'
 
     // Testing Espresso
     testImplementation 'junit:junit:4.12'
@@ -63,3 +98,5 @@ dependencies {
         exclude module: 'accessibility-test-framework'
     }
 }
+
+apply plugin: 'com.google.gms.google-services'

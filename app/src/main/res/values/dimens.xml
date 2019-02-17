@@ -21,4 +21,8 @@ http://developer.android.com/guide/topics/appwidgets/index.html#CreatingLayout
     <dimen name="drawer_ic_dimen">130dp</dimen>
     <dimen name="margin_8">8dp</dimen>
     <dimen name="widget_text_header_size">24sp</dimen>
+    <dimen name="error_message_text_size">16sp</dimen>
+    <dimen name="pb_dimen">50dp</dimen>
+    <dimen name="rd_margin">4dp</dimen>
+    <dimen name="rd_text_size">14sp</dimen>
 </resources>

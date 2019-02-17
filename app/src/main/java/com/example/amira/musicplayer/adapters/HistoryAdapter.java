@@ -16,6 +16,8 @@ import com.example.amira.musicplayer.data.DataContract;
 import com.example.amira.musicplayer.models.History;
 import com.squareup.picasso.Picasso;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -28,7 +30,6 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryI
     private List<History> mHistory;
     private Context mContext;
     private ItemOnClickHandler handler;
-    private int ID_COL , SPOTIFYID_COL , NAME_COL , IMAGE_COL , URL_COL , ARTIST_COL , DATE_COL;
 
     public HistoryAdapter(Context context , ItemOnClickHandler handler){
         mContext = context;
@@ -66,7 +67,13 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryI
                     .error(R.drawable.noimage)
                     .into(holder.mAlbumImage);
         }
-      //  holder.mAlbumDate.setText(mHistory.get(position).getCreatedAt().toString());
+        Date date = mHistory.get(position).getCreatedAt();
+        if(date != null) {
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+
+            String dateString = format.format(date);
+            holder.mAlbumDate.setText(dateString);
+        }
     }
 
     @Override
